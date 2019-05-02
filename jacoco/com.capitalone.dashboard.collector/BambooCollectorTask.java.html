@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BambooCollectorTask.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">com.capitalone.dashboard:bamboo-build-collector</a> &gt; <a href="index.source.html" class="el_package">com.capitalone.dashboard.collector</a> &gt; <span class="el_source">BambooCollectorTask.java</span></div><h1>BambooCollectorTask.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.capitalone.dashboard.collector;
+
+
+import com.capitalone.dashboard.model.BambooCollector;
+import com.capitalone.dashboard.model.BambooJob;
+import com.capitalone.dashboard.model.Build;
+import com.capitalone.dashboard.model.CollectorItem;
+import com.capitalone.dashboard.model.CollectorType;
+import com.capitalone.dashboard.repository.BambooCollectorRepository;
+import com.capitalone.dashboard.repository.BambooJobRepository;
+import com.capitalone.dashboard.repository.BaseCollectorRepository;
+import com.capitalone.dashboard.repository.BuildRepository;
+import com.capitalone.dashboard.repository.ComponentRepository;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClientException;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * CollectorTask that fetches Build information from Bamboo
+ */
+@Component
+public class BambooCollectorTask extends CollectorTask&lt;BambooCollector&gt; {
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+<span class="fc" id="L54">    private static final Logger LOG = LoggerFactory.getLogger(BambooCollectorTask.class);</span>
+
+
+    private final BambooCollectorRepository bambooCollectorRepository;
+    private final BambooJobRepository bambooJobRepository;
+    private final BuildRepository buildRepository;
+    private final BambooClient bambooClient;
+    private final BambooSettings bambooSettings;
+    private final ComponentRepository dbComponentRepository;
+
+    @Autowired
+    public BambooCollectorTask(TaskScheduler taskScheduler,
+                               BambooCollectorRepository bambooCollectorRepository,
+                               BambooJobRepository bambooJobRepository,
+                               BuildRepository buildRepository, BambooClient bambooClient,
+                               BambooSettings bambooSettings,
+                               ComponentRepository dbComponentRepository) {
+<span class="fc" id="L71">        super(taskScheduler, &quot;Bamboo&quot;);</span>
+<span class="fc" id="L72">        this.bambooCollectorRepository = bambooCollectorRepository;</span>
+<span class="fc" id="L73">        this.bambooJobRepository = bambooJobRepository;</span>
+<span class="fc" id="L74">        this.buildRepository = buildRepository;</span>
+<span class="fc" id="L75">        this.bambooClient = bambooClient;</span>
+<span class="fc" id="L76">        this.bambooSettings = bambooSettings;</span>
+<span class="fc" id="L77">        this.dbComponentRepository = dbComponentRepository;</span>
+<span class="fc" id="L78">    }</span>
+
+    @Override
+    public BambooCollector getCollector() {
+<span class="nc" id="L82">        return BambooCollector.prototype(bambooSettings.getServers(), bambooSettings.getNiceNames());</span>
+    }
+
+    @Override
+    public BaseCollectorRepository&lt;BambooCollector&gt; getCollectorRepository() {
+<span class="nc" id="L87">        return bambooCollectorRepository;</span>
+    }
+
+    @Override
+    public String getCron() {
+<span class="nc" id="L92">        return bambooSettings.getCron();</span>
+    }
+
+    @Override
+    public void collect(BambooCollector collector) {
+<span class="fc" id="L97">        long start = System.currentTimeMillis();</span>
+<span class="fc" id="L98">        Set&lt;ObjectId&gt; udId = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L99">        udId.add(collector.getId());</span>
+<span class="fc" id="L100">        List&lt;BambooJob&gt; existingJobs = bambooJobRepository.findByCollectorIdIn(udId);</span>
+<span class="fc" id="L101">        List&lt;BambooJob&gt; activeJobs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L102">        List&lt;String&gt; activeServers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L103">        activeServers.addAll(collector.getBuildServers());</span>
+
+<span class="fc" id="L105">        clean(collector, existingJobs);</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (String instanceUrl : collector.getBuildServers()) {</span>
+<span class="fc" id="L108">            logBanner(instanceUrl);</span>
+            try {
+<span class="fc" id="L110">                Map&lt;BambooJob, Set&lt;Build&gt;&gt; buildsByJob = bambooClient</span>
+<span class="fc" id="L111">                        .getInstanceJobs(instanceUrl);</span>
+<span class="fc" id="L112">                log(&quot;Fetched jobs&quot;, start);</span>
+<span class="fc" id="L113">                activeJobs.addAll(buildsByJob.keySet());</span>
+<span class="fc" id="L114">                addNewJobs(buildsByJob.keySet(), existingJobs, collector);</span>
+<span class="fc" id="L115">                addNewBuilds(enabledJobs(collector, instanceUrl), buildsByJob);</span>
+<span class="fc" id="L116">                log(&quot;Finished&quot;, start);</span>
+<span class="nc" id="L117">            } catch (RestClientException rce) {</span>
+<span class="nc" id="L118">                activeServers.remove(instanceUrl); // since it was a rest exception, we will not delete this job  and wait for</span>
+                // rest exceptions to clear up at a later run.
+<span class="nc" id="L120">                log(&quot;Error getting jobs for: &quot; + instanceUrl, start);</span>
+<span class="fc" id="L121">            }</span>
+<span class="fc" id="L122">        }</span>
+        // Delete jobs that will be no longer collected because servers have moved etc.
+<span class="fc" id="L124">        deleteUnwantedJobs(activeJobs, existingJobs, activeServers, collector);</span>
+<span class="fc" id="L125">    }</span>
+
+    /**
+     * Clean up unused bamboo/jenkins collector items
+     *
+     * @param collector    the {@link BambooCollector}
+     * @param existingJobs
+     */
+
+    private void clean(BambooCollector collector, List&lt;BambooJob&gt; existingJobs) {
+<span class="fc" id="L135">        Set&lt;ObjectId&gt; uniqueIDs = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        for (com.capitalone.dashboard.model.Component comp : dbComponentRepository</span>
+<span class="fc" id="L137">                .findAll()) {</span>
+
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            if (CollectionUtils.isEmpty(comp.getCollectorItems())) continue;</span>
+
+<span class="nc" id="L141">            List&lt;CollectorItem&gt; itemList = comp.getCollectorItems().get(CollectorType.Build);</span>
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            if (CollectionUtils.isEmpty(itemList)) continue;</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            for (CollectorItem ci : itemList) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                if (collector.getId().equals(ci.getCollectorId())) {</span>
+<span class="nc" id="L147">                    uniqueIDs.add(ci.getId());</span>
+                }
+<span class="nc" id="L149">            }</span>
+<span class="nc" id="L150">        }</span>
+<span class="fc" id="L151">        List&lt;BambooJob&gt; stateChangeJobList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (BambooJob job : existingJobs) {</span>
+<span class="pc bpc" id="L153" title="3 of 4 branches missed.">            if ((job.isEnabled() &amp;&amp; !uniqueIDs.contains(job.getId())) ||  // if it was enabled but not on a dashboard</span>
+<span class="pc bpc" id="L154" title="2 of 4 branches missed.">                    (!job.isEnabled() &amp;&amp; uniqueIDs.contains(job.getId()))) { // OR it was disabled and now on a dashboard</span>
+<span class="nc" id="L155">                job.setEnabled(uniqueIDs.contains(job.getId()));</span>
+<span class="nc" id="L156">                stateChangeJobList.add(job);</span>
+            }
+<span class="fc" id="L158">        }</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(stateChangeJobList)) {</span>
+<span class="nc" id="L160">            bambooJobRepository.save(stateChangeJobList);</span>
+        }
+<span class="fc" id="L162">    }</span>
+
+    /**
+     * Delete orphaned job collector items
+     *
+     * @param activeJobs
+     * @param existingJobs
+     * @param activeServers
+     * @param collector
+     */
+    private void deleteUnwantedJobs(List&lt;BambooJob&gt; activeJobs, List&lt;BambooJob&gt; existingJobs, List&lt;String&gt; activeServers, BambooCollector collector) {
+
+<span class="fc" id="L174">        List&lt;BambooJob&gt; deleteJobList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        for (BambooJob job : existingJobs) {</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">            if (job.isPushed()) continue; // build servers that push jobs will not be in active servers list by design</span>
+
+            // if we have a collector item for the job in repository but it's build server is not what we collect, remove it.
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">            if (!collector.getBuildServers().contains(job.getInstanceUrl())) {</span>
+<span class="nc" id="L180">                deleteJobList.add(job);</span>
+            }
+
+            //if the collector id of the collector item for the job in the repo does not match with the collector ID, delete it.
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (!job.getCollectorId().equals(collector.getId())) {</span>
+<span class="nc" id="L185">                deleteJobList.add(job);</span>
+            }
+
+            // this is to handle jobs that have been deleted from build servers. Will get 404 if we don't delete them.
+<span class="pc bpc" id="L189" title="1 of 4 branches missed.">            if (activeServers.contains(job.getInstanceUrl()) &amp;&amp; !activeJobs.contains(job)) {</span>
+<span class="fc" id="L190">                deleteJobList.add(job);</span>
+            }
+
+<span class="fc" id="L193">        }</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(deleteJobList)) {</span>
+<span class="fc" id="L195">            bambooJobRepository.delete(deleteJobList);</span>
+        }
+<span class="fc" id="L197">    }</span>
+
+    /**
+     * Iterates over the enabled build jobs and adds new builds to the database.
+     *
+     * @param enabledJobs list of enabled {@link BambooJob}s
+     * @param buildsByJob maps a {@link BambooJob} to a set of {@link Build}s.
+     */
+    private void addNewBuilds(List&lt;BambooJob&gt; enabledJobs,
+                              Map&lt;BambooJob, Set&lt;Build&gt;&gt; buildsByJob) {
+<span class="fc" id="L207">        long start = System.currentTimeMillis();</span>
+<span class="fc" id="L208">        int count = 0;</span>
+
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for (BambooJob job : enabledJobs) {</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if (job.isPushed()) {</span>
+<span class="nc" id="L212">                LOG.info(&quot;Job Pushed already: &quot; + job.getJobName());</span>
+<span class="nc" id="L213">                continue;</span>
+            }
+            // process new builds in the order of their build numbers - this has implication to handling of commits in BuildEventListener
+<span class="fc" id="L216">            ArrayList&lt;Build&gt; builds = Lists.newArrayList(nullSafe(buildsByJob.get(job)));</span>
+<span class="fc" id="L217">            builds.sort((Build b1, Build b2) -&gt; Integer.valueOf(b1.getNumber()) - Integer.valueOf(b2.getNumber()));</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            for (Build buildSummary : builds) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">                if (isNewBuild(job, buildSummary)) {</span>
+<span class="fc" id="L220">                    Build build = bambooClient.getBuildDetails(buildSummary</span>
+<span class="fc" id="L221">                            .getBuildUrl(), job.getInstanceUrl());</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">                    if (build != null) {</span>
+<span class="fc" id="L223">                        build.setCollectorItemId(job.getId());</span>
+<span class="fc" id="L224">                        buildRepository.save(build);</span>
+<span class="fc" id="L225">                        count++;</span>
+                    }
+                }
+<span class="fc" id="L228">            }</span>
+<span class="fc" id="L229">        }</span>
+<span class="fc" id="L230">        log(&quot;New builds&quot;, start, count);</span>
+<span class="fc" id="L231">    }</span>
+
+    private Set&lt;Build&gt; nullSafe(Set&lt;Build&gt; builds) {
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        return builds == null ? new HashSet&lt;Build&gt;() : builds;</span>
+    }
+
+    /**
+     * Adds new {@link BambooJob}s to the database as disabled jobs.
+     *
+     * @param jobs         list of {@link BambooJob}s
+     * @param existingJobs
+     * @param collector    the {@link BambooCollector}
+     */
+    private void addNewJobs(Set&lt;BambooJob&gt; jobs, List&lt;BambooJob&gt; existingJobs, BambooCollector collector) {
+<span class="fc" id="L245">        long start = System.currentTimeMillis();</span>
+<span class="fc" id="L246">        int count = 0;</span>
+
+<span class="fc" id="L248">        List&lt;BambooJob&gt; newJobs = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        for (BambooJob job : jobs) {</span>
+<span class="fc" id="L250">            BambooJob existing = null;</span>
+<span class="pc bpc" id="L251" title="1 of 4 branches missed.">            if (!CollectionUtils.isEmpty(existingJobs) &amp;&amp; (existingJobs.contains(job))) {</span>
+<span class="fc" id="L252">                existing = existingJobs.get(existingJobs.indexOf(job));</span>
+            }
+
+<span class="fc" id="L255">            String niceName = getNiceName(job, collector);</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            if (existing == null) {</span>
+<span class="fc" id="L257">                job.setCollectorId(collector.getId());</span>
+<span class="fc" id="L258">                job.setEnabled(false); // Do not enable for collection. Will be enabled when added to dashboard</span>
+<span class="fc" id="L259">                job.setDescription(job.getJobName());</span>
+<span class="fc" id="L260">                job.setLastUpdated(System.currentTimeMillis());</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">                if (StringUtils.isNotEmpty(niceName)) {</span>
+<span class="nc" id="L262">                    job.setNiceName(niceName);</span>
+                }
+<span class="fc" id="L264">                newJobs.add(job);</span>
+<span class="fc" id="L265">                count++;</span>
+<span class="pc bpc" id="L266" title="3 of 4 branches missed.">            } else if (StringUtils.isEmpty(existing.getNiceName()) &amp;&amp; StringUtils.isNotEmpty(niceName)) {</span>
+<span class="nc" id="L267">                existing.setNiceName(niceName);</span>
+<span class="nc" id="L268">                bambooJobRepository.save(existing);</span>
+            }
+<span class="fc" id="L270">        }</span>
+        //save all in one shot
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(newJobs)) {</span>
+<span class="fc" id="L273">            bambooJobRepository.save(newJobs);</span>
+        }
+<span class="fc" id="L275">        log(&quot;New jobs&quot;, start, count);</span>
+<span class="fc" id="L276">    }</span>
+
+    private String getNiceName(BambooJob job, BambooCollector collector) {
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(collector.getBuildServers())) return &quot;&quot;;</span>
+<span class="fc" id="L280">        List&lt;String&gt; servers = collector.getBuildServers();</span>
+<span class="fc" id="L281">        List&lt;String&gt; niceNames = collector.getNiceNames();</span>
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(niceNames)) return &quot;&quot;;</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">        for (int i = 0; i &lt; servers.size(); i++) {</span>
+<span class="pc bpc" id="L284" title="2 of 4 branches missed.">            if (servers.get(i).equalsIgnoreCase(job.getInstanceUrl()) &amp;&amp; (niceNames.size() &gt; (i + 1))) {</span>
+<span class="nc" id="L285">                return niceNames.get(i);</span>
+            }
+        }
+<span class="fc" id="L288">        return &quot;&quot;;</span>
+    }
+
+    private List&lt;BambooJob&gt; enabledJobs(BambooCollector collector,
+                                        String instanceUrl) {
+<span class="fc" id="L293">        return bambooJobRepository.findEnabledJobs(collector.getId(),</span>
+                instanceUrl);
+    }
+
+    @SuppressWarnings(&quot;unused&quot;)
+    private BambooJob getExistingJob(BambooCollector collector, BambooJob job) {
+<span class="nc" id="L299">        return bambooJobRepository.findJob(collector.getId(),</span>
+<span class="nc" id="L300">                job.getInstanceUrl(), job.getJobName());</span>
+    }
+
+    private boolean isNewBuild(BambooJob job, Build build) {
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        return buildRepository.findByCollectorItemIdAndNumber(job.getId(),</span>
+<span class="fc" id="L305">                build.getNumber()) == null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

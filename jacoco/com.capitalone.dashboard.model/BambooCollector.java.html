@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BambooCollector.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">com.capitalone.dashboard:bamboo-build-collector</a> &gt; <a href="index.source.html" class="el_package">com.capitalone.dashboard.model</a> &gt; <span class="el_source">BambooCollector.java</span></div><h1>BambooCollector.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.capitalone.dashboard.model;
+
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Extension of Collector that stores current build server configuration.
+ */
+<span class="fc" id="L30">public class BambooCollector extends Collector {</span>
+<span class="fc" id="L31">    private List&lt;String&gt; buildServers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L32">    private List&lt;String&gt; niceNames = new ArrayList&lt;&gt;();</span>
+
+    public List&lt;String&gt; getBuildServers() {
+<span class="fc" id="L35">        return buildServers;</span>
+    }
+
+    public List&lt;String&gt; getNiceNames() {
+<span class="fc" id="L39">        return niceNames;</span>
+    }
+
+    public void setNiceNames(List&lt;String&gt; niceNames) {
+<span class="nc" id="L43">        this.niceNames = niceNames;</span>
+<span class="nc" id="L44">    }</span>
+
+    public void setBuildServers(List&lt;String&gt; buildServers) {
+<span class="nc" id="L47">        this.buildServers = buildServers;</span>
+<span class="nc" id="L48">    }</span>
+
+    public static BambooCollector prototype(List&lt;String&gt; buildServers, List&lt;String&gt; niceNames) {
+<span class="fc" id="L51">        BambooCollector protoType = new BambooCollector();</span>
+<span class="fc" id="L52">        protoType.setName(&quot;Bamboo&quot;);</span>
+<span class="fc" id="L53">        protoType.setCollectorType(CollectorType.Build);</span>
+<span class="fc" id="L54">        protoType.setOnline(true);</span>
+<span class="fc" id="L55">        protoType.setEnabled(true);</span>
+<span class="fc" id="L56">        protoType.getBuildServers().addAll(buildServers);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(niceNames)) {</span>
+<span class="fc" id="L58">            protoType.getNiceNames().addAll(niceNames);</span>
+        }
+<span class="fc" id="L60">        Map&lt;String, Object&gt; options = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L61">        options.put(BambooJob.INSTANCE_URL,&quot;&quot;);</span>
+<span class="fc" id="L62">        options.put(BambooJob.JOB_URL,&quot;&quot;);</span>
+<span class="fc" id="L63">        options.put(BambooJob.JOB_NAME,&quot;&quot;);</span>
+<span class="fc" id="L64">        protoType.setAllFields(options);</span>
+<span class="fc" id="L65">        protoType.setUniqueFields(options);</span>
+<span class="fc" id="L66">        return protoType;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>
