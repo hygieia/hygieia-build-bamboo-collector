@@ -207,9 +207,8 @@
             <exclude>**logs/**</exclude>
             <exclude>**site-content/**</exclude>
             <exclude>RELEASE-NOTES.txt</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/apache.config.template</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/test.properties.template</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/svnserve.config.template</exclude>
+            <exclude>src/test/resources/com/capitalone/dashboard/collector/buildDetails_full.json</exclude>
+            <exclude>src/test/resources/com/capitalone/dashboard/collector/instanceJobs_twoJobsTwoBuilds.json</exclude>
             <exclude>src/main/resources/banner.txt</exclude>
           </excludes>
         </configuration>
@@ -421,9 +420,8 @@
             <exclude>**logs/**</exclude>
             <exclude>**site-content/**</exclude>
             <exclude>RELEASE-NOTES.txt</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/apache.config.template</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/test.properties.template</exclude>
-            <exclude>src/test/resources/org/tmatesoft/svn/test/svnserve.config.template</exclude>
+            <exclude>src/test/resources/com/capitalone/dashboard/collector/buildDetails_full.json</exclude>
+            <exclude>src/test/resources/com/capitalone/dashboard/collector/instanceJobs_twoJobsTwoBuilds.json</exclude>
             <exclude>src/main/resources/banner.txt</exclude>
           </excludes>
         </configuration>
