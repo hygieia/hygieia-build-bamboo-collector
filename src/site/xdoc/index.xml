@@ -24,6 +24,77 @@
             Welcome ot the Hygieia Build Bamboo Collector
 
             <subsection name="Setup Instructions">
+                <div id="readme" class="Box-body readme blob instapaper_body js-code-block-container">
+                    <article class="markdown-body entry-content p-3 p-md-6" itemprop="text"><h1><a id="user-content-hygieia-build-bamboo-collector" class="anchor" aria-hidden="true" href="#hygieia-build-bamboo-collector"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hygieia Build Bamboo Collector.</h1>
+                        <p>Configure the Bamboo Collector to display and monitor information (related to build status) on the Hygieia Dashboard, from Bamboo. Hygieia uses Spring Boot to package the collector as an executable JAR file with dependencies.</p>
+                        <h3><a id="user-content-setup-instructions" class="anchor" aria-hidden="true" href="#setup-instructions"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup Instructions</h3>
+                        <p>To configure the Bamboo Collector, execute the following steps:</p>
+                        <ul>
+                            <li><strong>Step 1: Change Directory</strong></li>
+                        </ul>
+                        <p>Change the current working directory to the <code>bamboo</code> directory of your Hygieia source code installation.</p>
+                        <p>For example, in the Windows command prompt, run the following command:</p>
+                        <pre><code>cd C:\Users\[usernname]\hygieia\collectors\build\bamboo
+                        </code></pre>
+                        <ul>
+                            <li><strong>Step 2: Run Maven Build</strong></li>
+                        </ul>
+                        <p>Run the maven build to package the collector into an executable JAR file:</p>
+                        <pre><code>mvn install
+                        </code></pre>
+                        <p>The output file <code>bamboo-collector.jar</code> is generated in the <code>bamboo\target</code> folder.</p>
+                        <ul>
+                            <li><strong>Step 3: Set Parameters in Application Properties File</strong></li>
+                        </ul>
+                        <p>Set the configurable parameters in the <code>application.properties</code> file to connect to the Dashboard MongoDB database instance, including properties required by the Bamboo Collector.</p>
+                        <p>To configure parameters for the Bamboo Collector, refer to the sample <a href="#sample-application-properties-file">application.properties</a> file.</p>
+                        <p>For information about sourcing the application properties file, refer to the <a href="http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-external-config-application-property-files" rel="nofollow">Spring Boot Documentation</a>.</p>
+                        <ul>
+                            <li><strong>Step 4: Deploy the Executable File</strong></li>
+                        </ul>
+                        <p>To deploy the <code>bamboo-collector.jar</code> file, change directory to <code>bamboo\target</code>, and then execute the following from the command prompt:</p>
+                        <pre><code>java -jar bamboo-collector.jar --spring.config.name=bamboo --spring.config.location=[path to application.properties file]
+                        </code></pre>
+                        <h3><a id="user-content-sample-application-properties-file" class="anchor" aria-hidden="true" href="#sample-application-properties-file"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Application Properties File</h3>
+                        <div class="highlight highlight-source-ini"><pre><span class="pl-c"><span class="pl-c">#</span> Database Name</span>
+                            <span class="pl-k">dbname</span>=dashboarddb
+
+                            <span class="pl-c"><span class="pl-c">#</span> Database HostName - default is localhost</span>
+                            <span class="pl-k">dbhost</span>=localhost
+
+                            <span class="pl-c"><span class="pl-c">#</span> Database Port - default is 27017</span>
+                            <span class="pl-k">dbport</span>=9999
+
+                            <span class="pl-c"><span class="pl-c">#</span> MongoDB replicaset</span>
+                            <span class="pl-k">dbreplicaset</span>=[false if you are not using MongoDB replicaset]
+                            <span class="pl-k">dbhostport</span>=[host1:port1,host2:port2,host3:port3]
+
+                            <span class="pl-c"><span class="pl-c">#</span> Database Username - default is blank</span>
+                            <span class="pl-k">dbusername</span>=dashboarduser
+
+                            <span class="pl-c"><span class="pl-c">#</span> Database Password - default is blank</span>
+                            <span class="pl-k">dbpassword</span>=dbpassword
+
+                            <span class="pl-c"><span class="pl-c">#</span> Collector schedule (required)</span>
+                            <span class="pl-k">bamboo.cron</span>=0 0/5 * * * *
+
+                            <span class="pl-c"><span class="pl-c">#</span> Jenkins server (required) - Can provide multiple</span>
+                            bamboo.servers[0]=http://bamboo.company.com
+
+                            <span class="pl-c"><span class="pl-c">#</span> If using username/token for API authentication</span>
+                            <span class="pl-c"><span class="pl-c">#</span> (required for Cloudbees Jenkins Ops Center) see sample</span>
+                            bamboo.servers[1]=http://username:token@bamboo.company.com
+
+                            <span class="pl-c"><span class="pl-c">#</span> Another option: If using same username/password Jenkins auth,</span>
+                            <span class="pl-c"><span class="pl-c">#</span> set username/apiKey to use HTTP Basic Auth (blank=no auth)</span>
+                            <span class="pl-k">bamboo.username</span>=
+                            <span class="pl-k">bamboo.apiKey</span>=
+
+                            <span class="pl-c"><span class="pl-c">#</span> Determines if build console log is collected - defaults to false</span>
+                            <span class="pl-c"><span class="pl-c">#</span> (Bamboo for some reason has not exposed it as an API)</span>
+                            <span class="pl-k">bamboo.saveLog</span>=false</pre></div>
+                    </article>
+                </div>
             </subsection>
         </section>
         <!-- ================================================== -->
