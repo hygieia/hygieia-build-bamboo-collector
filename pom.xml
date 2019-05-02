@@ -23,6 +23,7 @@
   <packaging>jar</packaging>
 
   <artifactId>bamboo-build-collector</artifactId>
+  <version>3.0.2-SNAPSHOT</version>
 
   <parent>
     <groupId>com.capitalone.dashboard</groupId>
