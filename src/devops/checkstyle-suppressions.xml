@@ -16,5 +16,6 @@ limitations under the License.
 <!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
-    <suppress checks="JavadocMethod" files=".*SubversionCollectorTask.*"/>
+    <suppress checks="AbbreviationAsWordInNameCheck" files=".*BambooSettings.*"/>
+
 </suppressions>
