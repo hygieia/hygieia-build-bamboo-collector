@@ -339,12 +339,12 @@ public class DefaultBambooClient implements BambooClient {
       String dateString = (String) jsonItem.get("date");
       try {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(dateString).getTime();
-      } catch (java.text.ParseException e) {
+      } catch (java.text.ParseException parseException) {
         // Try an alternate date format...looks like this one is used by Git
         try {
           return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse(dateString).getTime();
         } catch (java.text.ParseException e1) {
-          LOG.error("Invalid date string: " + dateString, e);
+          LOG.error("Invalid date string: " + dateString, parseException);
         }
       }
     }
@@ -401,9 +401,9 @@ public class DefaultBambooClient implements BambooClient {
     }
   }
 
-  protected ResponseEntity<String> makeRestCall(String sUrl) throws MalformedURLException {
-    URI thisuri = URI.create(sUrl);
-    String userInfo = thisuri.getUserInfo();
+  protected ResponseEntity<String> makeRestCall(String url) throws MalformedURLException {
+    URI thisUri = URI.create(url);
+    String userInfo = thisUri.getUserInfo();
 
     //get userinfo from URI or settings (in spring properties)
     if (StringUtils.isEmpty(userInfo) && (this.settings.getUsername() != null) && (this.settings.getApiKey() != null)) {
@@ -411,11 +411,11 @@ public class DefaultBambooClient implements BambooClient {
     }
     // Basic Auth only.
     if (StringUtils.isNotEmpty(userInfo)) {
-      return rest.exchange(thisuri, HttpMethod.GET,
+      return rest.exchange(thisUri, HttpMethod.GET,
           new HttpEntity<>(createHeaders(userInfo)),
           String.class);
     } else {
-      return rest.exchange(thisuri, HttpMethod.GET, null,
+      return rest.exchange(thisUri, HttpMethod.GET, null,
           String.class);
     }
 
