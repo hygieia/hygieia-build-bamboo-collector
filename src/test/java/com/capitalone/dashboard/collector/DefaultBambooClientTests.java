@@ -73,19 +73,19 @@ public class DefaultBambooClientTests {
 
     @Test
     public void joinURLsTest() throws Exception {
-        String u = DefaultBambooClient.joinURL("http://bamboo.com",
+        String u = DefaultBambooClient.joinUrl("http://bamboo.com",
                 "/api/json?tree=jobs[name,url,builds[number,url]]");
         assertEquals("http://bamboo.com/api/json?tree=jobs[name,url,builds[number,url]]", u);
 
-        String u4 = DefaultBambooClient.joinURL("http://bamboo.com/", "test",
+        String u4 = DefaultBambooClient.joinUrl("http://bamboo.com/", "test",
                 "/api/json?tree=jobs[name,url,builds[number,url]]");
         assertEquals("http://bamboo.com/test/api/json?tree=jobs[name,url,builds[number,url]]", u4);
 
-        String u2 = DefaultBambooClient.joinURL("http://bamboo.com/", "/test/",
+        String u2 = DefaultBambooClient.joinUrl("http://bamboo.com/", "/test/",
                 "/api/json?tree=jobs[name,url,builds[number,url]]");
         assertEquals("http://bamboo.com/test/api/json?tree=jobs[name,url,builds[number,url]]", u2);
 
-        String u3 = DefaultBambooClient.joinURL("http://bamboo.com", "///test",
+        String u3 = DefaultBambooClient.joinUrl("http://bamboo.com", "///test",
                 "/api/json?tree=jobs[name,url,builds[number,url]]");
         assertEquals("http://bamboo.com/test/api/json?tree=jobs[name,url,builds[number,url]]", u3);
     }
