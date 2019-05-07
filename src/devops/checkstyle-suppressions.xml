@@ -17,5 +17,6 @@ limitations under the License.
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
     <suppress checks="AbbreviationAsWordInNameCheck" files=".*BambooSettings.*"/>
+    <suppress checks="AbbreviationAsWordInNameCheck" files=".*DefaultBambooClient.*"/>
 
 </suppressions>
