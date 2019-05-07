@@ -70,8 +70,8 @@
     <jacoco.maven.plugin.version>0.8.3</jacoco.maven.plugin.version>
     <jacoco.coverage.percentage.minimum>0.500</jacoco.coverage.percentage.minimum>
     <jacoco.classes.missed.minimum>15</jacoco.classes.missed.minimum>
-    <japicmp.breakBuildOnBinaryIncompatibleModifications>true</japicmp.breakBuildOnBinaryIncompatibleModifications>
-    <japicmp.breakBuildOnSourceIncompatibleModifications>true</japicmp.breakBuildOnSourceIncompatibleModifications>
+    <japicmp.breakBuildOnBinaryIncompatibleModifications>false</japicmp.breakBuildOnBinaryIncompatibleModifications>
+    <japicmp.breakBuildOnSourceIncompatibleModifications>false</japicmp.breakBuildOnSourceIncompatibleModifications>
     <japicmp.skip>false</japicmp.skip>
     <java.compilation.source>1.8</java.compilation.source>
     <java.compilation.target>1.8</java.compilation.target>
@@ -131,7 +131,7 @@
 
   <build>
 <!--    <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check spotbugs:check javadoc:javadoc</defaultGoal>-->
-    <defaultGoal>clean verify apache-rat:check spotbugs:check</defaultGoal>
+    <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check spotbugs:check javadoc:javadoc</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

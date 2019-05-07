@@ -76,8 +76,8 @@ public class DefaultBambooClient implements BambooClient {
   /**
    * Spring dependency-injection controller.
    *
-   * @param restOperationsSupplier @Autowired.
-   * @param settings               @Autowired.
+   * @param restOperationsSupplier is Autowired.
+   * @param settings               is Autowired.
    */
   @Autowired
   public DefaultBambooClient(
