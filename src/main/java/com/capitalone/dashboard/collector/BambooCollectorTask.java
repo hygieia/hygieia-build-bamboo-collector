@@ -41,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -243,8 +244,7 @@ public class BambooCollectorTask extends CollectorTask<BambooCollector> {
       // process new builds in the order of their build numbers - this has
       // implication to handling of commits in BuildEventListener
       ArrayList<Build> builds = Lists.newArrayList(nullSafe(buildsByJob.get(job)));
-      builds.sort((Build b1, Build b2) ->
-          Integer.valueOf(b1.getNumber()) - Integer.valueOf(b2.getNumber()));
+      builds.sort(Comparator.comparingInt((Build b) -> Integer.valueOf(b.getNumber())));
       for (Build buildSummary : builds) {
         if (isNewBuild(job, buildSummary)) {
           Build build = bambooClient.getBuildDetails(buildSummary

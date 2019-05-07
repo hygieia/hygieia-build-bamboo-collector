@@ -92,7 +92,7 @@ public class DefaultBambooClient implements BambooClient {
   public Map<BambooJob, Set<Build>> getInstanceJobs(String instanceUrl) {
     Map<BambooJob, Set<Build>> result = new LinkedHashMap<>();
     try {
-      String url = joinURL(instanceUrl, JOBS_URL_SUFFIX);
+      String url = joinUrl(instanceUrl, JOBS_URL_SUFFIX);
       ResponseEntity<String> responseEntity = makeRestCall(url);
       String returnJson = responseEntity.getBody();
       LOG.debug(returnJson);
@@ -119,8 +119,8 @@ public class DefaultBambooClient implements BambooClient {
 
           // Finding out the results of the top-level plan
 
-          String resultUrl = joinURL(instanceUrl, JOBS_RESULT_SUFFIX);
-          resultUrl = joinURL(resultUrl, planName);
+          String resultUrl = joinUrl(instanceUrl, JOBS_RESULT_SUFFIX);
+          resultUrl = joinUrl(resultUrl, planName);
           LOG.debug("Job:" + planName);
           LOG.debug("Result URL:" + resultUrl);
           responseEntity = makeRestCall(resultUrl);
@@ -139,7 +139,7 @@ public class DefaultBambooClient implements BambooClient {
               LOG.debug("BuildNO " + buildNumber + " for planName: " + planName);
               Build bambooBuild = new Build();
               bambooBuild.setNumber(buildNumber);
-              String buildUrl = joinURL(resultUrl, buildNumber); //getString(jsonBuild, "url");
+              String buildUrl = joinUrl(resultUrl, buildNumber); //getString(jsonBuild, "url");
               LOG.debug(buildUrl);
               //Modify localhost if Docker Natting is being done
               if (!dockerLocalHostIp.isEmpty()) {
@@ -157,7 +157,7 @@ public class DefaultBambooClient implements BambooClient {
           result.put(bambooJob, builds);
 
           //But we might have many branches and subplans in them so we have to find them out as well
-          String branchesUrl = joinURL(planUrl, "/branch");
+          String branchesUrl = joinUrl(planUrl, "/branch");
           responseEntity = makeRestCall(branchesUrl);
           returnJson = responseEntity.getBody();
           JSONObject jsonBranches = (JSONObject) parser.parse(returnJson);
@@ -167,8 +167,8 @@ public class DefaultBambooClient implements BambooClient {
             String subPlan = branchObject.get("key").toString();
             // Figure out nested jobs under the branches
 
-            resultUrl = joinURL(instanceUrl, JOBS_RESULT_SUFFIX);
-            resultUrl = joinURL(resultUrl, subPlan);
+            resultUrl = joinUrl(instanceUrl, JOBS_RESULT_SUFFIX);
+            resultUrl = joinUrl(resultUrl, subPlan);
             LOG.debug("sub Plan:" + subPlan);
             LOG.debug("sub plan-Result URL:" + resultUrl);
             responseEntity = makeRestCall(resultUrl);
@@ -186,7 +186,7 @@ public class DefaultBambooClient implements BambooClient {
                 LOG.debug("BuildNO " + buildNumber + " for planName: " + planName);
                 Build bambooBuild = new Build();
                 bambooBuild.setNumber(buildNumber);
-                String buildUrl = joinURL(resultUrl, buildNumber); //getString(jsonBuild, "url");
+                String buildUrl = joinUrl(resultUrl, buildNumber); //getString(jsonBuild, "url");
                 LOG.debug(buildUrl);
                 //Modify localhost if Docker Natting is being done
                 if (!dockerLocalHostIp.isEmpty()) {
@@ -223,7 +223,7 @@ public class DefaultBambooClient implements BambooClient {
   public Build getBuildDetails(String buildUrl, String instanceUrl) {
     try {
       String newUrl = rebuildJobUrl(buildUrl, instanceUrl);
-      String url = joinURL(newUrl, BUILD_DETAILS_URL_SUFFIX);
+      String url = joinUrl(newUrl, BUILD_DETAILS_URL_SUFFIX);
       LOG.debug("Build Details URL:" + url);
       ResponseEntity<String> result = makeRestCall(url);
       String resultJson = result.getBody();
@@ -436,7 +436,7 @@ public class DefaultBambooClient implements BambooClient {
 
   protected String getLog(String buildUrl) {
     try {
-      return makeRestCall(joinURL(buildUrl, "consoleText")).getBody();
+      return makeRestCall(joinUrl(buildUrl, "consoleText")).getBody();
     } catch (MalformedURLException mfe) {
       LOG.error("malformed url for build log", mfe);
     }
@@ -451,7 +451,7 @@ public class DefaultBambooClient implements BambooClient {
    * @param paths the comma delimited paths of the Url.
    * @return a joined Url as a {@link String}.
    */
-  public static String joinURL(String base, String... paths) {
+  public static String joinUrl(String base, String... paths) {
     StringBuilder result = new StringBuilder(base);
     for (String path : paths) {
       String pathWithSlashStripped = path.replaceFirst("^(\\/)+", "");
