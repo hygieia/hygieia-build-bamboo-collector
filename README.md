@@ -17,7 +17,10 @@
 Hygieia Build Bamboo Collector.
 ===============================
 
-Configure the Bamboo Collector to display and monitor information (related to build status) on the Hygieia Dashboard, from Bamboo. Hygieia uses Spring Boot to package the collector as an executable JAR file with dependencies.
+[![Coverage Status](https://coveralls.io/repos/github/Hygieia/hygieia-banbood-build/badge.svg?branch=master)](https://coveralls.io/github/Hygieia/hygieia-scm-subversion-collector?branch=master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.capitalone.dashboard/bambood-build-collector/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.capitalone.dashboard/bambood-build-collector/)
+
+Configure the Bamboo Collector to display and monitor inf                                                                                                                                                                                                                                                                                                                                                                           ormation (related to build status) on the Hygieia Dashboard, from Bamboo. Hygieia uses Spring Boot to package the collector as an executable JAR file with dependencies.
 
 ### Setup Instructions
 
