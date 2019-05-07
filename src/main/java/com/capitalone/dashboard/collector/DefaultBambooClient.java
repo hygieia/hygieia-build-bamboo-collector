@@ -406,7 +406,9 @@ public class DefaultBambooClient implements BambooClient {
     String userInfo = thisUri.getUserInfo();
 
     //get userinfo from URI or settings (in spring properties)
-    if (StringUtils.isEmpty(userInfo) && (this.settings.getUsername() != null) && (this.settings.getApiKey() != null)) {
+    if (StringUtils.isEmpty(userInfo)
+        && (this.settings.getUsername() != null)
+        && (this.settings.getApiKey() != null)) {
       userInfo = this.settings.getUsername() + ":" + this.settings.getApiKey();
     }
     // Basic Auth only.
@@ -442,15 +444,21 @@ public class DefaultBambooClient implements BambooClient {
     return "";
   }
 
-  // join a base url to another path or paths - this will handle trailing or non-trailing /'s
-  public static String joinUrl(String base, String... paths) throws MalformedURLException {
+  /**
+   * Join a base url to another path or paths - this will handle trailing or non-trailing /'s.
+   *
+   * @param base the base of the Url.
+   * @param paths the comma delimited paths of the Url.
+   * @return a joined Url as a {@link String}.
+   */
+  public static String joinUrl(String base, String... paths) {
     StringBuilder result = new StringBuilder(base);
     for (String path : paths) {
-      String p = path.replaceFirst("^(\\/)+", "");
+      String pathWithSlashStripped = path.replaceFirst("^(\\/)+", "");
       if (result.lastIndexOf("/") != result.length() - 1) {
         result.append('/');
       }
-      result.append(p);
+      result.append(pathWithSlashStripped);
     }
     return result.toString();
   }
