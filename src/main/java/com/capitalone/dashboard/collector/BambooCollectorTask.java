@@ -244,7 +244,7 @@ public class BambooCollectorTask extends CollectorTask<BambooCollector> {
       // process new builds in the order of their build numbers - this has
       // implication to handling of commits in BuildEventListener
       ArrayList<Build> builds = Lists.newArrayList(nullSafe(buildsByJob.get(job)));
-      builds.sort(Comparator.comparingInt((Build b) -> Integer.valueOf(b.getNumber())));
+      builds.sort(Comparator.comparingInt((Build build) -> Integer.valueOf(build.getNumber())));
       for (Build buildSummary : builds) {
         if (isNewBuild(job, buildSummary)) {
           Build build = bambooClient.getBuildDetails(buildSummary
