@@ -42,7 +42,7 @@ cd C:\Users\[usernname]\hygieia\collectors\build\bamboo
 Run the maven build to package the collector into an executable JAR file:
 
 ``` 
-mvn install
+mvn clean install
 ```
 
 The output file `bamboo-collector.jar` is generated in the `bamboo\target` folder.
